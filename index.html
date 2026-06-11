@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jonny Thunder | The Wilderness Librarian</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        forest: {
+                            50: '#f2f7f4',
+                            100: '#e1ede6',
+                            600: '#2d5a27',
+                            700: '#1e3f1b',
+                            800: '#142a12',
+                            900: '#0b160a',
+                        },
+                        parchment: {
+                            50: '#faf8f5',
+                            100: '#f5efe6',
+                            200: '#eadecb',
+                            900: '#2c251e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth transitions for theme switching */
+        .theme-transition {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5efe6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d5a27;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="theme-transition bg-parchment-50 text-parchment-900 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- Top Banner / Navigation -->
+    <header class="theme-transition border-b border-parchment-200 bg-white/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-forest-600 text-white p-2.5 rounded-lg shadow-md">
+                    <!-- Custom SVG combination of book + knife -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-forest-700 font-serif">Jonny Thunder</h1>
+                    <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Librarian @ TCC</p>
+                </div>
+            </div>
+
+            <!-- Mode Switcher & Survival Link -->
+            <div class="flex items-center gap-4">
+                <!-- Interactive Theme Switcher Button -->
+                <button id="themeToggle" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-parchment-200 bg-parchment-100 hover:bg-parchment-200 transition-all shadow-sm">
+                    <span id="themeDot" class="w-2.5 h-2.5 rounded-full bg-forest-600 inline-block animate-pulse"></span>
+                    <span id="themeLabel">Academic Mode</span>
+                </button>
+
+                <!-- Requested Survival Link -->
+                <a href="survival.html" class="inline-flex items-center gap-2 bg-forest-600 hover:bg-forest-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition-all transform hover:-translate-y-0.5">
+                    <span>Survival Guide</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Biography Card -->
+        <section class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-parchment-200 shadow-sm theme-transition relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-forest-50 rounded-full -mr-8 -mt-8 opacity-50"></div>
+                
+                <!-- Avatar & Identity -->
+                <div class="relative text-center pb-6 border-b border-parchment-100">
+                    <div class="w-32 h-32 mx-auto rounded-full bg-parchment-200 border-4 border-white shadow-md flex items-center justify-center text-4xl font-serif text-forest-700 font-bold overflow-hidden relative">
+                        <!-- Custom Silhouette Badge -->
+                        <span id="avatarText">JT</span>
+                        <div class="absolute bottom-0 inset-x-0 bg-forest-600/90 text-white text-[10px] py-0.5 font-sans tracking-widest font-bold">TCC</div>
+                    </div>
+                    <h2 class="text-2xl font-serif font-bold text-forest-800 mt-4">Jonny Thunder</h2>
+                    <p class="text-sm font-medium text-gray-500">Librarian, Archives & Special Collections</p>
+                    <p class="text-xs text-forest-600 font-bold mt-1">Tarrant County College</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="py-6 space-y-4 text-sm border-b border-parchment-100">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Location:</span>
+                        <span class="font-semibold text-right">TCC Libraries / Deep Woods</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Preferred Shaving Tool:</span>
+                        <span class="font-semibold text-right" id="shaveStat">Fresh Pine Stick</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">MARC Validation:</span>
+                        <span class="font-semibold text-green-600 text-right">Permanently Bypassed</span>
+                    </div>
+                </div>
+
+                <!-- Philosophy Quote -->
+                <div class="pt-6">
+                    <p class="italic text-gray-600 text-sm font-serif">
+                        "The classification of knowledge must match the wild disorder of nature. A catalog without grit is just an inventory of a cage."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Interactive Elements & Skills -->
+        <section class="lg:col-span-8 space-y-8">
+            
+            <!-- Intro Card -->
+            <div class="bg-forest-700 text-white rounded-2xl p-8 relative overflow-hidden shadow-lg">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10 max-w-xl">
+                    <span class="bg-forest-800/80 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-forest-600">Featured Librarian</span>
+                    <h3 class="text-3xl font-serif font-bold mt-3 mb-4">Master of the Wilderness & The Written Word</h3>
+                    <p class="text-forest-100 text-sm leading-relaxed mb-6">
+                        Welcome to the official repository of Jonny Thunder. Bridging the gap between strict digital cataloging regulations and raw, unfiltered survival skills. Whether you need a catalog cleaned or a campfire built, you are in safe hands.
+                    </p>
+                    <a href="survival.html" class="inline-flex items-center gap-2 bg-white text-forest-800 hover:bg-parchment-100 text-sm font-bold px-5 py-2.5 rounded-lg shadow-md transition-all">
+                        <span>Read the Survival Manifesto</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Special Skills Section -->
+            <div>
+                <h3 class="text-2xl font-serif font-bold text-forest-800 mb-6 flex items-center gap-2">
+                    <span>Specialized Skills</span>
+                    <span class="text-xs bg-forest-100 text-forest-700 px-2.5 py-0.5 rounded-full font-sans">Verified</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Skill 1: Squirrel Skinning -->
+                    <div class="bg-white p-6 rounded-xl border border-parchment-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-red-50 text-red-700 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                                </svg>
+                            </div>
+                            <h4 class="font-serif font-bold text-lg text-forest-800">Skinning Squirrels</h4>
+                            <p class="text-xs text-gray-500 mt-1 mb-3">Wilderness Meat Harvesting</p>
+                            <p class="text-sm text-gray-600 leading-relaxed">
+                                Complete, swift field preparation of small game with minimal tools. Clean, efficient, and respectful extraction.
+                            </p>
+                        </div>
+                        <button onclick="simulateSkill('squirrel')" class="mt-4 w-full bg-parchment-100 hover:bg-parchment-200 text-xs font-bold py-2 rounded transition-all text-center">
+                            Demonstrate Skill
+                        </button>
+                    </div>
+
+                    <!-- Skill 2: Stick Shaving -->
+                    <div class="bg-white p-6 rounded-xl border border-parchment-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <h4 class="font-serif font-bold text-lg text-forest-800">Shaving with a Stick</h4>
+                            <p class="text-xs text-gray-500 mt-1 mb-3">Grooming & Survival Tooling</p>
+                            <p class="text-sm text-gray-600 leading-relaxed">
+                                Maintaining professional appearance when scissors/blades are missing. Requires a high-carbon pine branch or sharp dry reed.
+                            </p>
+                        </div>
+                        <button onclick="simulateSkill('stick')" class="mt-4 w-full bg-parchment-100 hover:bg-parchment-200 text-xs font-bold py-2 rounded transition-all text-center">
+                            Demonstrate Shave
+                        </button>
+                    </div>
+
+                    <!-- Skill 3: Altering MARC Records -->
+                    <div class="bg-white p-6 rounded-xl border border-parchment-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                                </svg>
+                            </div>
+                            <h4 class="font-serif font-bold text-lg text-forest-800">Altering MARC Records</h4>
+                            <p class="text-xs text-gray-500 mt-1 mb-3">Database Rebellion</p>
+                            <p class="text-sm text-gray-600 leading-relaxed">
+                                Bending rigid Library of Congress formats. Infusing meta-data fields (245, 100) with wilderness indices.
+                            </p>
+                        </div>
+                        <button onclick="scrollToMarc()" class="mt-4 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 rounded transition-all text-center">
+                            Launch MARC Terminal
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Simulator Box (Populates dynamically based on click) -->
+            <div id="simulatorBox" class="hidden bg-stone-900 text-stone-200 rounded-xl p-6 border border-stone-800 shadow-inner font-mono text-sm relative">
+                <button onclick="closeSimulator()" class="absolute top-4 right-4 text-stone-500 hover:text-stone-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="flex items-center gap-2 text-stone-400 text-xs uppercase mb-3">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    <span id="simulatorTitle">Demonstration Terminal</span>
+                </div>
+                <div id="simulatorOutput" class="space-y-2 whitespace-pre-line leading-relaxed text-green-400">
+                    <!-- Dynamic injection -->
+                </div>
+            </div>
+
+            <!-- MARC Record Editor Widget -->
+            <div id="marcSection" class="bg-stone-950 text-emerald-400 p-6 rounded-2xl border border-stone-800 shadow-2xl font-mono">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-800 pb-4 mb-4 gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
+                            <h4 class="text-sm font-bold tracking-widest text-white uppercase">MARC 21 RECORD ALTERATION CONSOLE</h4>
+                        </div>
+                        <p class="text-[10px] text-stone-500 mt-0.5">TARGET: Tarrant County College Database Node #412</p>
+                    </div>
+                    <span class="text-[10px] bg-red-950 text-red-400 border border-red-900 px-2.5 py-0.5 rounded uppercase font-bold">Unsanctioned Access</span>
+                </div>
+
+                <!-- Fields -->
+                <div class="space-y-3 text-xs sm:text-sm">
+                    <!-- Leader -->
+                    <div class="flex flex-col sm:flex-row gap-2 border-b border-stone-900 pb-2">
+                        <span class="text-stone-500 sm:w-20 font-bold">LEADER</span>
+                        <span class="text-stone-400">00825cam a22002251  4500</span>
+                    </div>
+
+                    <!-- Field 100 -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-baseline">
+                        <span class="text-amber-500 sm:w-20 font-bold">100 1_</span>
+                        <div class="flex-grow flex gap-1 items-baseline">
+                            <span class="text-stone-500">_a</span>
+                            <input id="marcAuthor" type="text" value="Thunder, Jonny," class="bg-stone-900 border border-stone-800 rounded px-2 py-0.5 text-emerald-300 w-full focus:outline-none focus:border-emerald-500">
+                            <span class="text-stone-500">_e</span>
+                            <span class="text-stone-400">author.</span>
+                        </div>
+                    </div>
+
+                    <!-- Field 245 -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-baseline">
+                        <span class="text-amber-500 sm:w-20 font-bold">245 10</span>
+                        <div class="flex-grow flex gap-1 items-baseline">
+                            <span class="text-stone-500">_a</span>
+                            <input id="marcTitle" type="text" value="Cataloging in the Bush: How to Index Books While Tracking Grizzlies /" class="bg-stone-900 border border-stone-800 rounded px-2 py-0.5 text-emerald-300 w-full focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- Field 260 -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-baseline">
+                        <span class="text-amber-500 sm:w-20 font-bold">260 __</span>
+                        <div class="flex-grow flex gap-1 items-baseline text-stone-400">
+                            <span class="text-stone-500">_a</span><span>Fort Worth (TCC) :</span>
+                            <span class="text-stone-500">_b</span><span>Thunder & Sticks Press,</span>
+                            <span class="text-stone-500">_c</span><span>2026.</span>
+                        </div>
+                    </div>
+
+                    <!-- Field 650 -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-baseline">
+                        <span class="text-amber-500 sm:w-20 font-bold">650 _0</span>
+                        <div class="flex-grow flex gap-1 items-baseline">
+                            <span class="text-stone-500">_a</span>
+                            <input id="marcSubject" type="text" value="Survival skills with high-degree Dewey Decimal cross-references." class="bg-stone-900 border border-stone-800 rounded px-2 py-0.5 text-emerald-300 w-full focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- Jonny's Rogue Field 999 -->
+                    <div class="flex flex-col sm:flex-row gap-2 items-baseline bg-amber-950/20 p-2 rounded border border-amber-900/40">
+                        <span class="text-red-500 sm:w-20 font-bold">999 _X</span>
+                        <div class="flex-grow flex gap-1 items-baseline">
+                            <span class="text-stone-500">_s</span>
+                            <span class="text-yellow-400 font-bold">Squirrel skinned index: 4.2 kg/hr</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-stone-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-stone-500 text-[10px] max-w-md">WARNING: Altering these records directly violates Library of Congress protocols. Alteration is permitted under Thunder Emergency Bypass Rules.</p>
+                    <button onclick="commitMarcChanges()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold text-xs px-4 py-2 rounded transition-all">
+                        Alter & Push to TCC Catalog
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="theme-transition border-t border-parchment-200 bg-white/50 py-8 mt-12 text-center text-xs text-gray-500">
+        <div class="max-w-6xl mx-auto px-4 space-y-2">
+            <p>&copy; 2026 Jonny Thunder. Dynamic Survival Librarian Syndicate. All records modified without warranty.</p>
+            <p class="flex items-center justify-center gap-1.5">
+                <span>Designed for survival.</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-forest-600 inline-block"></span>
+                <a href="survival.html" class="font-bold text-forest-600 hover:underline">Survival Documentation (survival.html)</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Custom Modals / Interactive Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-stone-100 px-4 py-3 rounded-xl border border-stone-800 shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500" id="toastStatus"></span>
+        <p class="text-xs font-mono" id="toastMessage">Success.</p>
+    </div>
+
+    <!-- Javascript for Features & Interactivity -->
+    <script>
+        // 1. Theme Toggler (Wilderness Mode / Academic Mode)
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        const themeDot = document.getElementById('themeDot');
+        const body = document.body;
+        let isWilderness = false;
+
+        themeToggle.addEventListener('click', () => {
+            isWilderness = !isWilderness;
+            if (isWilderness) {
+                // Change classes for Wilderness Mode
+                body.classList.remove('bg-parchment-50', 'text-parchment-900');
+                body.classList.add('bg-stone-900', 'text-stone-100');
+                themeLabel.textContent = "Wilderness Mode";
+                themeDot.className = "w-2.5 h-2.5 rounded-full bg-red-600 inline-block animate-ping";
+                showToast("ALERT: Wilderness Protocol Activated. Watch for local predators.");
+            } else {
+                // Return to Academic Library Mode
+                body.classList.remove('bg-stone-900', 'text-stone-100');
+                body.classList.add('bg-parchment-50', 'text-parchment-900');
+                themeLabel.textContent = "Academic Mode";
+                themeDot.className = "w-2.5 h-2.5 rounded-full bg-forest-600 inline-block animate-pulse";
+                showToast("INFO: Academic Library Protocol Restored. Shh.");
+            }
+        });
+
+        // 2. Simulated Skill Outputs
+        const simulatorBox = document.getElementById('simulatorBox');
+        const simulatorTitle = document.getElementById('simulatorTitle');
+        const simulatorOutput = document.getElementById('simulatorOutput');
+
+        function simulateSkill(skillType) {
+            simulatorBox.classList.remove('hidden');
+            // Scroll to simulator dynamically
+            simulatorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            if (skillType === 'squirrel') {
+                simulatorTitle.textContent = "SEQUENCE: Skinning Squirrels (Field Manual v1.02)";
+                simulatorOutput.innerHTML = `[Step 1] Verify target is clean and collected safely.
+[Step 2] Slice a precise lateral opening across the lower hindquarters.
+[Step 3] Step cleanly upon the tail to anchor the pelt.
+[Step 4] Pull upward with dynamic, controlled velocity to extract pure, field-ready meat.
+[Step 5] Log collection data directly into local MARC database. Perfect for catalog system sustenance.`;
+            } else if (skillType === 'stick') {
+                simulatorTitle.textContent = "SEQUENCE: Shaving with a Sharp Stick";
+                simulatorOutput.innerHTML = `[Step 1] Select high-carbon dried pine or hardened hemlock wood.
+[Step 2] Use a stone scraper to hone a perfect micro-edge.
+[Step 3] Lather face cleanly with forest-harvested pine-sap cream.
+[Step 4] Draw stick at a exact 22.5 degree angle relative to skin structure.
+[Step 5] Maintain strict TCC faculty grooming compliance in remote wilderness setups.`;
+            }
+        }
+
+        function closeSimulator() {
+            simulatorBox.classList.add('hidden');
+        }
+
+        function scrollToMarc() {
+            document.getElementById('marcSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showToast("INFO: Console Ready. Input Alteration.");
+        }
+
+        // 3. MARC Record Alteration Logic
+        function commitMarcChanges() {
+            const author = document.getElementById('marcAuthor').value;
+            const title = document.getElementById('marcTitle').value;
+            const subject = document.getElementById('marcSubject').value;
+
+            // Generate a retro logs output
+            showToast("PUSHING ROGUE METADATA TO L.C...");
+            setTimeout(() => {
+                showToast("SUCCESS: MARC records hijacked and saved!");
+                // Console effect inside the simulator
+                simulatorBox.classList.remove('hidden');
+                simulatorTitle.textContent = "DATABASE REBELLION: Commited Record";
+                simulatorOutput.innerHTML = `>>> STDOUT: Pushing alterations...
+>>> OK: Transmitting to library servers.
+>>> AUTHOR REDEFINE: "${author}"
+>>> TITLE OVERWRITE: "${title}"
+>>> SUBJECT CODE ADDED: "${subject}"
+>>> CONG. LIBRARY ALERT BYPASSED. Jonny's modifications are officially live!`;
+                simulatorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 1000);
+        }
+
+        // 4. Custom Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = message;
+            
+            // Pop up
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            // Hide after 3.5s
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
