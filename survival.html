@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LRC-101: Combat Zone Survival | Mrs. Vance's Archives</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=VT323&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Custom CRT & retro terminal styling */
+    .font-mono-terminal {
+      font-family: 'VT323', monospace;
+    }
+    .font-typewriter {
+      font-family: 'Courier Prime', monospace;
+    }
+    .font-sans-cool {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .crt-effect {
+      position: relative;
+    }
+    .crt-effect::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      aspect-ratio: auto;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #fbbf24;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f59e0b;
+    }
+    /* Flashing animation */
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .animate-pulse-soft {
+      animation: pulse-soft 2s infinite;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans-cool antialiased selection:bg-amber-500 selection:text-black crt-effect">
+
+  <!-- Floating HUD / Top Bar -->
+  <header class="border-b-2 border-amber-500/30 bg-slate-900/90 backdrop-blur px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500 flex items-center justify-center text-amber-500 animate-pulse-soft">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.33l-7.5-5-7.5 5V21" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-sm md:text-base font-bold tracking-wider text-amber-400 font-mono-terminal text-2xl uppercase">LRC-101: Apocalypse Prep</h1>
+        <p class="text-xs text-slate-400 hidden sm:block">Instructor: Mrs. Vance, Head Librarian (Emeritus)</p>
+      </div>
+    </div>
+    
+    <!-- Student Live Stats -->
+    <div id="student-hud" class="hidden flex items-center gap-4 text-xs md:text-sm">
+      <div class="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 flex items-center gap-2">
+        <span class="text-slate-400">Student:</span>
+        <span id="hud-name" class="font-semibold text-amber-400">Scout</span>
+      </div>
+      <div class="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 flex items-center gap-2">
+        <span class="text-slate-400">Stealth:</span>
+        <div class="w-16 md:w-24 bg-slate-800 h-2.5 rounded-full overflow-hidden">
+          <div id="hud-stealth" class="bg-emerald-500 h-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+      </div>
+      <div class="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 flex items-center gap-2">
+        <span class="text-slate-400">Moxie:</span>
+        <span id="hud-moxie" class="text-cyan-400 font-bold">100%</span>
+      </div>
+    </div>
+
+    <!-- Retro Sound Toggle -->
+    <button onclick="toggleMute()" id="sound-btn" class="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 transition border border-slate-700 text-xs">
+      <span id="sound-icon">🔊</span> <span class="hidden md:inline">FX ON</span>
+    </button>
+  </header>
+
+  <!-- Main Dynamic Workspace -->
+  <main class="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black p-4 md:p-8 flex flex-col items-center justify-center">
+    
+    <!-- INSTRUCTIONAL POPUPS (Custom non-alert system) -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border-2 border-amber-500 max-w-md w-full rounded-xl overflow-hidden shadow-2xl">
+        <div class="bg-amber-500/10 border-b border-amber-500/30 px-6 py-4 flex items-center gap-3">
+          <span class="text-amber-500 text-2xl font-mono-terminal">⚠️ DESK ANNOUNCEMENT</span>
+        </div>
+        <div class="p-6">
+          <p id="modal-text" class="text-slate-300 text-sm md:text-base leading-relaxed font-typewriter">
+            Keep your voices down!
+          </p>
+        </div>
+        <div class="bg-slate-950 px-6 py-4 flex justify-end">
+          <button onclick="closeModal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 active:translate-y-0.5 text-slate-950 font-bold rounded-lg text-sm transition">
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 0: ENROLLMENT & ORIENTATION -->
+    <section id="stage-0" class="max-w-2xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-10 shadow-xl transition-all duration-500">
+      <div class="text-center mb-8">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Class Registration Is Open</span>
+        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-100 mt-3 tracking-tight font-mono-terminal">SURV-101: WARFARE & YOU</h2>
+        <p class="text-slate-400 mt-2 text-sm md:text-base">A survival clinic for teenagers trapped in active faction conflicts.</p>
+      </div>
+
+      <!-- Mrs. Vance Greeting Bubble -->
+      <div class="flex items-start gap-4 bg-slate-950/80 p-5 rounded-xl border border-amber-500/30 mb-8">
+        <div class="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex-shrink-0 flex items-center justify-center text-3xl overflow-hidden relative">
+          👵🏼
+        </div>
+        <div>
+          <h4 class="font-bold text-amber-400 text-sm tracking-wide">MRS. VANCE (YOUR LIBRARIAN)</h4>
+          <p class="text-slate-300 text-xs md:text-sm italic leading-relaxed mt-1 font-typewriter">
+            "Shh! Quiet in the stacks, children. Since the Municipal Government folded and the campus became a DMZ, the Library is the only neutral ground left. Today, we aren't learning algebra. We are learning how to read faction banners, sneak past scav-hounds, and not get pinned down in the crossfire. Grab your library card, let's catalog your survival chances!"
+          </p>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <div class="space-y-6">
+        <div>
+          <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Student Name or Call Sign:</label>
+          <input type="text" id="student-name-input" placeholder="e.g., Bookworm, Scrap-Kid, Sarah..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition font-typewriter">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-3">Choose Your Academic Avatar:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button onclick="selectAvatar('📚', 'The Archivist')" class="avatar-card border border-slate-800 bg-slate-950 hover:bg-slate-900 rounded-xl p-4 transition text-center group active:scale-95" data-avatar="📚">
+              <span class="text-3xl block group-hover:scale-110 transition">📚</span>
+              <span class="text-xs font-semibold text-slate-400 block mt-2">Archivist</span>
+            </button>
+            <button onclick="selectAvatar('🔬', 'The Tech-Scout')" class="avatar-card border border-slate-800 bg-slate-950 hover:bg-slate-900 rounded-xl p-4 transition text-center group active:scale-95" data-avatar="🔬">
+              <span class="text-3xl block group-hover:scale-110 transition">🔬</span>
+              <span class="text-xs font-semibold text-slate-400 block mt-2">Tech-Scout</span>
+            </button>
+            <button onclick="selectAvatar('✏️', 'The Mapmaker')" class="avatar-card border border-slate-800 bg-slate-950 hover:bg-slate-900 rounded-xl p-4 transition text-center group active:scale-95" data-avatar="✏️">
+              <span class="text-3xl block group-hover:scale-110 transition">✏️</span>
+              <span class="text-xs font-semibold text-slate-400 block mt-2">Mapmaker</span>
+            </button>
+            <button onclick="selectAvatar('🦺', 'The Safety Monitor')" class="avatar-card border border-slate-800 bg-slate-950 hover:bg-slate-900 rounded-xl p-4 transition text-center group active:scale-95" data-avatar="🦺">
+              <span class="text-3xl block group-hover:scale-110 transition">🦺</span>
+              <span class="text-xs font-semibold text-slate-400 block mt-2">Safety Monitor</span>
+            </button>
+          </div>
+        </div>
+
+        <button onclick="startOrientation()" class="w-full bg-amber-500 hover:bg-amber-600 active:translate-y-0.5 text-slate-950 font-extrabold py-4 rounded-xl shadow-lg shadow-amber-500/10 tracking-wider uppercase transition">
+          Authorize Library Card & Begin Lesson ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- STAGE 1: INTEL & CODEX (WARRING FACTIONS) -->
+    <section id="stage-1" class="hidden max-w-4xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-8 shadow-xl transition-all duration-500">
+      <div class="border-b border-slate-800 pb-4 mb-6 flex justify-between items-center flex-wrap gap-2">
+        <div>
+          <span class="text-xs font-bold tracking-wider text-amber-400 uppercase">Module 1 / 4</span>
+          <h3 class="text-2xl md:text-3xl font-extrabold text-slate-100 font-mono-terminal">CODEX: THE FACTION CATALOG</h3>
+        </div>
+        <div class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs rounded-full">
+          Current Objective: Learn the warning signs
+        </div>
+      </div>
+
+      <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-6 font-typewriter">
+        "Knowledge is armor, class. Before stepping foot out of our quiet study zone, you must know who is shooting at whom. Click on each faction profile in the catalog cards below to memorize their tags, territorial markings, and aggression levels."
+      </p>
+
+      <!-- Faction Cards Grid -->
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        
+        <!-- Faction A: Iron Scholars -->
+        <div onclick="readFaction('iron-scholars')" class="cursor-pointer bg-slate-950 hover:bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 rounded-xl p-5 transition group relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-xl group-hover:bg-cyan-500/10 transition"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">⚙️</span>
+            <div>
+              <h4 class="font-bold text-cyan-400 group-hover:text-cyan-300 transition text-sm">THE IRON SCHOLARS</h4>
+              <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Heavy Industrial</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 line-clamp-3">Militaristic engineers hoarding ancient blueprints. Heavy weapons, slow movement, extremely territorial.</p>
+          <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Aggression: MEDIUM</span>
+            <span class="text-cyan-500 font-bold group-hover:underline">Read File ➔</span>
+          </div>
+        </div>
+
+        <!-- Faction B: Scrap-Horde -->
+        <div onclick="readFaction('scrap-horde')" class="cursor-pointer bg-slate-950 hover:bg-slate-900/70 border border-slate-800 hover:border-red-500/50 rounded-xl p-5 transition group relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-xl group-hover:bg-red-500/10 transition"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">💀</span>
+            <div>
+              <h4 class="font-bold text-red-500 group-hover:text-red-400 transition text-sm">THE SCRAP-HORDE</h4>
+              <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Raider Syndicate</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 line-clamp-3">Fast, chaotic raiders fueled by adrenaline and crude oil. Known for noise, traps, and absolute disregard for rules.</p>
+          <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Aggression: CRITICAL</span>
+            <span class="text-red-500 font-bold group-hover:underline">Read File ➔</span>
+          </div>
+        </div>
+
+        <!-- Faction C: Neon-Covey -->
+        <div onclick="readFaction('neon-covey')" class="cursor-pointer bg-slate-950 hover:bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-5 transition group relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-xl group-hover:bg-emerald-500/10 transition"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">⚡</span>
+            <div>
+              <h4 class="font-bold text-emerald-400 group-hover:text-emerald-300 transition text-sm">THE NEON COVEY</h4>
+              <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Cyber Guerrillas</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 line-clamp-3">Subterranean hacktivists utilizing high-frequency frequencies, stealth camouflage, and silent arrows.</p>
+          <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Aggression: UNPREDICTABLE</span>
+            <span class="text-emerald-500 font-bold group-hover:underline">Read File ➔</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Detail Panel (Shows when a faction card is clicked) -->
+      <div id="faction-details" class="hidden bg-slate-950 rounded-xl p-5 border border-slate-800 mb-6 transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center gap-3">
+            <span id="detail-icon" class="text-4xl">⚙️</span>
+            <div>
+              <h4 id="detail-title" class="text-lg font-bold text-slate-100">Faction Detail</h4>
+              <span id="detail-tag" class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Subcategory</span>
+            </div>
+          </div>
+          <button onclick="closeDetails()" class="text-slate-500 hover:text-slate-300 text-xs px-2.5 py-1 rounded bg-slate-900 border border-slate-800">Close</button>
+        </div>
+
+        <!-- Faction Details Core Specs -->
+        <div class="grid sm:grid-cols-3 gap-4 text-xs border-y border-slate-800 py-4 my-4">
+          <div>
+            <span class="text-slate-500 block mb-1">TERRITORIAL SIGN:</span>
+            <span id="detail-sign" class="text-slate-200 font-mono font-bold text-sm">---</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">FAVORED WEAPONS:</span>
+            <span id="detail-weapons" class="text-slate-200 font-mono font-bold text-sm">---</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">WEAKNESS:</span>
+            <span id="detail-weakness" class="text-slate-200 font-mono font-bold text-sm">---</span>
+          </div>
+        </div>
+
+        <p id="detail-desc" class="text-slate-300 text-xs md:text-sm leading-relaxed mb-4 font-typewriter">
+          Detailed background intel...
+        </p>
+      </div>
+
+      <!-- Mini-Quiz: Identify the threat (Interactive check) -->
+      <div id="faction-quiz-block" class="border border-slate-800 bg-slate-950/60 p-5 rounded-xl">
+        <h4 class="font-bold text-slate-200 text-sm tracking-wide flex items-center gap-2 mb-3">
+          <span>🎯</span> POP-TEST: "READING THE WALLS"
+        </h4>
+        <p class="text-slate-300 text-xs md:text-sm mb-4 font-typewriter">
+          Mrs. Vance shows you a Polaroid photo of a brick wall spray-painted with <span class="text-red-500 font-bold bg-slate-900 px-1.5 py-0.5 rounded font-mono">"X-HEADS RULE / RED OIL"</span> and a skull tag. Which faction has declared control over this block?
+        </p>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <button onclick="answerFactionQuiz(false)" class="p-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-slate-300 text-xs rounded-lg border border-slate-800 text-left transition">
+            A) The Iron Scholars
+          </button>
+          <button onclick="answerFactionQuiz(true)" class="p-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-slate-300 text-xs rounded-lg border border-slate-800 text-left transition">
+            B) The Scrap-Horde
+          </button>
+          <button onclick="answerFactionQuiz(false)" class="p-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-slate-300 text-xs rounded-lg border border-slate-800 text-left transition">
+            C) The Neon Covey
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="mt-8 flex justify-end">
+        <button id="next-to-stage-2" disabled class="px-6 py-3 bg-slate-800 text-slate-500 font-bold rounded-xl tracking-wider uppercase transition cursor-not-allowed">
+          Advance to Scavenge Study ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- STAGE 2: RESOURCE CATALOGING (LIBRARIAN BARTER & LOOT) -->
+    <section id="stage-2" class="hidden max-w-4xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-8 shadow-xl transition-all duration-500">
+      <div class="border-b border-slate-800 pb-4 mb-6 flex justify-between items-center flex-wrap gap-2">
+        <div>
+          <span class="text-xs font-bold tracking-wider text-amber-400 uppercase">Module 2 / 4</span>
+          <h3 class="text-2xl md:text-3xl font-extrabold text-slate-100 font-mono-terminal">SCAVENGING & THE DEWEY SYSTEM</h3>
+        </div>
+        <div class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs rounded-full">
+          Current Objective: Classify resources
+        </div>
+      </div>
+
+      <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-6 font-typewriter">
+        "In a conflict zone, weight is life. Carrying useless heavy objects makes you easy target practice. We've compiled a pile of scraps from a bombed local drugstore. Click on the items below to **Catalog** them into either **ESSENTIAL SURVIVAL** or **USELESS / NOISY BAIT**."
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        
+        <!-- Loot Pile -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-slate-300 text-xs uppercase tracking-widest mb-4">Unsorted Scavenge Pile</h4>
+          <div id="scav-pile" class="grid grid-cols-2 gap-3">
+            <!-- Items rendered dynamically in JS -->
+          </div>
+        </div>
+
+        <!-- Shelf Category Containers -->
+        <div class="space-y-4 flex flex-col justify-between">
+          
+          <!-- Essential Shelf -->
+          <div id="essential-shelf" class="bg-emerald-950/20 border-2 border-dashed border-emerald-500/30 p-5 rounded-xl flex-1 flex flex-col justify-start">
+            <h5 class="text-emerald-400 font-bold text-xs uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>🎒</span> ESSENTIAL SURVIVAL SHELF
+            </h5>
+            <div id="essential-items" class="flex flex-wrap gap-2">
+              <span class="text-slate-600 text-xs italic py-2">Click items to analyze/sort...</span>
+            </div>
+          </div>
+
+          <!-- Useless Shelf -->
+          <div id="useless-shelf" class="bg-red-950/20 border-2 border-dashed border-red-500/30 p-5 rounded-xl flex-1 flex flex-col justify-start">
+            <h5 class="text-red-400 font-bold text-xs uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>🗑️</span> USELESS / NOISY TRAP SHELF
+            </h5>
+            <div id="useless-items" class="flex flex-wrap gap-2">
+              <span class="text-slate-600 text-xs italic py-2">Click items to analyze/sort...</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Progression Button -->
+      <div class="flex justify-between items-center border-t border-slate-800 pt-6">
+        <div class="text-xs text-slate-400 font-typewriter" id="scav-counter-text">
+          Items classified: <span class="font-bold text-amber-400">0/6</span>
+        </div>
+        <button id="next-to-stage-3" disabled class="px-6 py-3 bg-slate-800 text-slate-500 font-bold rounded-xl tracking-wider uppercase transition cursor-not-allowed">
+          Lock In Supplies ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- STAGE 3: STEALTH SIMULATOR (THE QUIET STUDY ZONE) -->
+    <section id="stage-3" class="hidden max-w-4xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-8 shadow-xl transition-all duration-500">
+      <div class="border-b border-slate-800 pb-4 mb-6 flex justify-between items-center flex-wrap gap-2">
+        <div>
+          <span class="text-xs font-bold tracking-wider text-amber-400 uppercase">Module 3 / 4</span>
+          <h3 class="text-2xl md:text-3xl font-extrabold text-slate-100 font-mono-terminal">SIMULATION: STEALTH SNEAK</h3>
+        </div>
+        <div class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs rounded-full">
+          Current Objective: Cross Broad Street silently
+        </div>
+      </div>
+
+      <!-- Sound Engine / Decibel Meter interactive training -->
+      <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="max-w-md">
+            <h4 class="font-bold text-amber-400 text-sm tracking-wide">Stealth Calibration: Breathe In...</h4>
+            <p class="text-slate-400 text-xs mt-1 font-typewriter">
+              Walking quietly is an art form. Click "Muffle Footsteps" only when the sound wave rhythm indicator drops below the danger zone.
+            </p>
+          </div>
+          
+          <div class="flex flex-col items-center justify-center bg-slate-900 p-3 rounded-lg border border-slate-800 w-full md:w-auto">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-2">Noise Level Indicator</span>
+            <div class="flex items-end gap-1 h-12 w-48 justify-center mb-2">
+              <div class="w-4 bg-emerald-500 transition-all duration-300" id="db-bar-1" style="height: 10%"></div>
+              <div class="w-4 bg-emerald-500 transition-all duration-300" id="db-bar-2" style="height: 30%"></div>
+              <div class="w-4 bg-amber-500 transition-all duration-300" id="db-bar-3" style="height: 60%"></div>
+              <div class="w-4 bg-red-500 transition-all duration-300" id="db-bar-4" style="height: 90%"></div>
+              <div class="w-4 bg-red-500 transition-all duration-300" id="db-bar-5" style="height: 75%"></div>
+            </div>
+            <button onclick="tapFootstep()" id="sneak-practice-btn" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase rounded transition">
+              Muffle Footsteps (Tap!)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario Simulator Screen (Typewriter dynamic text) -->
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-6">
+        <!-- Visual Map Frame -->
+        <div class="w-full md:w-2/5 aspect-[4/3] bg-slate-900 border border-slate-800 rounded-lg flex flex-col items-center justify-center text-center p-4 relative overflow-hidden">
+          <div class="absolute inset-0 bg-cover bg-center opacity-25" style="background-image: url('https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&q=80&w=400');"></div>
+          <div class="relative z-10">
+            <span class="text-5xl block animate-pulse" id="sim-visual-icon">🎒</span>
+            <h5 class="font-bold text-slate-100 text-sm uppercase mt-4" id="sim-visual-label">Street Block 3</h5>
+            <p class="text-[11px] text-slate-400 mt-1 max-w-[200px]" id="sim-visual-desc">Shelter remains 200m away.</p>
+          </div>
+          <!-- Danger meter -->
+          <div class="absolute bottom-2 left-2 right-2 flex justify-between text-[10px] text-slate-500">
+            <span>Noise: <strong class="text-amber-500" id="sim-noise-stat">LOW</strong></span>
+            <span>Cover: <strong class="text-cyan-400" id="sim-cover-stat">HIGH</strong></span>
+          </div>
+        </div>
+
+        <!-- Decision Box -->
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-cyan-400 font-mono tracking-wider uppercase" id="sim-turn-label">Scenario Phase 1</span>
+            <h4 class="text-lg font-bold text-slate-200 mt-1" id="sim-heading">The Open Crossroads</h4>
+            <p class="text-slate-300 text-xs md:text-sm mt-3 leading-relaxed font-typewriter min-h-[100px]" id="sim-description">
+              You are squatting behind a rusted mailbox. Two blockades of the Scrap-Horde are firing crude mortars towards the Iron Scholars further down the block. Shrapnel is shattering glass above you. What is your reaction?
+            </p>
+          </div>
+
+          <!-- Dynamic Interaction Options -->
+          <div class="space-y-3 mt-6" id="sim-choices-box">
+            <!-- Choice buttons populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- STAGE 4: POST-APOCALYPTIC EXAM (THE CARD TEST) -->
+    <section id="stage-4" class="hidden max-w-2xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-10 shadow-xl transition-all duration-500">
+      <div class="text-center mb-8 border-b border-slate-800 pb-4">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Final Competency Exam</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-100 mt-3 tracking-tight font-mono-terminal">SURVIVAL LIBRARY CARD ACCREDITATION</h2>
+        <p class="text-slate-400 mt-2 text-sm md:text-base font-typewriter">"Quietly flip the page. Let's see what you've processed."</p>
+      </div>
+
+      <!-- Question Box -->
+      <div id="quiz-container" class="space-y-6">
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800">
+          <div class="flex justify-between items-center text-xs text-slate-500 mb-2">
+            <span id="quiz-progress-text">Question 1 of 4</span>
+            <span class="text-amber-500 font-bold">LRC-101 CORE METRIC</span>
+          </div>
+          <p id="quiz-question-text" class="text-slate-200 font-bold text-sm md:text-base font-typewriter mb-4">
+            Loading curriculum criteria...
+          </p>
+          <div class="space-y-3" id="quiz-options-box">
+            <!-- Dynamic choice buttons loaded via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 5: GRADUATION (THE REWARD) -->
+    <section id="stage-5" class="hidden max-w-2xl w-full bg-slate-900/40 border-2 border-slate-800 backdrop-blur rounded-2xl p-6 md:p-8 shadow-xl transition-all duration-500 text-center">
+      <div class="mb-6">
+        <span class="text-5xl block animate-bounce">🎓</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-100 mt-4 tracking-tight font-mono-terminal">CURRICULUM COMPLETED!</h2>
+        <p class="text-slate-400 mt-1 text-sm md:text-base font-typewriter">"You survived Mrs. Vance's curriculum. Excellent work."</p>
+      </div>
+
+      <!-- Physical Looking Library Card -->
+      <div class="bg-gradient-to-br from-amber-500/10 to-amber-950/20 border-2 border-amber-500/80 rounded-2xl p-6 max-w-md mx-auto my-8 relative overflow-hidden shadow-xl shadow-amber-500/5 text-left font-typewriter">
+        
+        <!-- Retro microchip icon -->
+        <div class="absolute top-6 right-6 w-12 h-10 bg-slate-950 border border-amber-500/50 rounded-lg flex flex-col justify-around p-1.5 opacity-80">
+          <div class="w-full h-1 bg-amber-500/30"></div>
+          <div class="w-full h-1 bg-amber-500/30"></div>
+          <div class="w-full h-1 bg-amber-500/30"></div>
+        </div>
+
+        <div class="border-b border-amber-500/30 pb-4 mb-4">
+          <h3 class="text-amber-400 font-extrabold text-lg tracking-widest font-mono-terminal uppercase">CIVILIAN SURVIVAL AUTHORIZATION</h3>
+          <span class="text-[10px] text-slate-400 uppercase tracking-widest block mt-0.5">Community College LRC Unit 4</span>
+        </div>
+
+        <div class="flex gap-4">
+          <!-- Portrait Box -->
+          <div class="w-24 h-28 bg-slate-950 border border-amber-500/30 rounded-lg flex flex-col items-center justify-center p-2 text-center text-xs flex-shrink-0 relative overflow-hidden">
+            <span class="text-4xl" id="card-avatar">📚</span>
+            <span class="text-[9px] text-amber-500 block mt-2 tracking-tighter uppercase truncate w-full" id="card-role">Archivist</span>
+            <!-- Red stamp overlay -->
+            <div class="absolute -bottom-1 -right-1 bg-emerald-500/20 text-emerald-400 text-[8px] font-bold border border-emerald-500 px-1 py-0.5 rounded rotate-12 scale-90">
+              PASSED
+            </div>
+          </div>
+
+          <!-- Card Specs -->
+          <div class="flex-1 space-y-3 text-xs">
+            <div>
+              <span class="text-slate-500 block uppercase text-[10px] tracking-wider">HOLDER NAME:</span>
+              <span class="text-slate-200 font-bold font-mono text-sm tracking-wide" id="card-holder-name">Scout</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block uppercase text-[10px] tracking-wider">CERTIFICATION RANK:</span>
+              <span class="text-amber-400 font-bold uppercase tracking-wider" id="card-rank">Wasteland Bibliophile</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              <div>
+                <span class="text-slate-500 block text-[9px] tracking-wider">HEALTH STATUS:</span>
+                <span class="text-emerald-400 font-bold">100% VIGOR</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[9px] tracking-wider">ID BARCODE:</span>
+                <span class="text-slate-400 font-mono tracking-tighter text-[9px]">LRC-9983-VANCE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barcode effect at the bottom -->
+        <div class="mt-6 flex flex-col items-center">
+          <div class="w-full bg-slate-950 h-8 flex justify-between items-center px-4 py-1.5 opacity-60 rounded border border-amber-500/20">
+            <div class="flex gap-0.5 h-full items-stretch">
+              <div class="w-1 bg-amber-400"></div><div class="w-2 bg-amber-400"></div><div class="w-0.5 bg-amber-400"></div><div class="w-1 bg-amber-400"></div><div class="w-2 bg-amber-400"></div><div class="w-0.5 bg-amber-400"></div><div class="w-1 bg-amber-400"></div><div class="w-3 bg-amber-400"></div><div class="w-1 bg-amber-400"></div>
+            </div>
+            <div class="flex gap-0.5 h-full items-stretch">
+              <div class="w-2 bg-amber-400"></div><div class="w-0.5 bg-amber-400"></div><div class="w-1 bg-amber-400"></div><div class="w-3 bg-amber-400"></div><div class="w-1 bg-amber-400"></div><div class="w-2 bg-amber-400"></div><div class="w-0.5 bg-amber-400"></div><div class="w-1 bg-amber-400"></div><div class="w-2 bg-amber-400"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mrs. Vance Graduation Note -->
+      <div class="flex items-start gap-4 bg-slate-950 p-5 rounded-xl border border-slate-800 text-left max-w-lg mx-auto mb-6">
+        <span class="text-3xl">👵🏼</span>
+        <div>
+          <h4 class="font-bold text-amber-400 text-xs tracking-wider uppercase mb-1">Mrs. Vance: "I'm Proud of You!"</h4>
+          <p class="text-slate-300 text-xs leading-relaxed font-typewriter">
+            "Now off you go, student. Remember: never return a book late, never fire a rifle from a shelf unless calibrated, and keep your head down when the whistles blow. You've got survival instinct. Go rebuild the world!"
+          </p>
+        </div>
+      </div>
+
+      <!-- Restart button -->
+      <button onclick="restartCourse()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm uppercase tracking-wider rounded-xl transition">
+        Enroll Next Survivor ➔
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-black/90 py-3 text-center text-xs text-slate-500">
+    <p>© 2026 Neo-City Community College Library Annex. Free to distribute during active ceasefires.</p>
+  </footer>
+
+  <!-- Application Logic & Custom Web Audio Engine -->
+  <script>
+    // Audio Context Setup
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Synthetic Sound Synthesizer using Web Audio API
+    function playBeep(type) {
+      if (isMuted) return;
+      initAudio();
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now); // A5
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'success') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'fail') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'action') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'siren') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.25);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.5);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      const soundBtn = document.getElementById('sound-btn');
+      const soundIcon = document.getElementById('sound-icon');
+      if (isMuted) {
+        soundIcon.textContent = '🔇';
+        soundBtn.classList.remove('bg-slate-800');
+        soundBtn.classList.add('bg-slate-900', 'text-slate-600');
+        soundBtn.querySelector('span:last-child').textContent = 'FX OFF';
+      } else {
+        soundIcon.textContent = '🔊';
+        soundBtn.classList.remove('bg-slate-900', 'text-slate-600');
+        soundBtn.classList.add('bg-slate-800', 'text-slate-300');
+        soundBtn.querySelector('span:last-child').textContent = 'FX ON';
+        initAudio();
+        playBeep('click');
+      }
+    }
+
+    // custom modal trigger
+    function showModal(text) {
+      document.getElementById('modal-text').innerHTML = text;
+      document.getElementById('custom-modal').classList.remove('hidden');
+      playBeep('siren');
+    }
+
+    function closeModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+      playBeep('click');
+    }
+
+    // Application Global State
+    let studentState = {
+      name: "Scout",
+      avatar: "📚",
+      avatarRole: "The Archivist",
+      stealth: 100,
+      moxie: 100,
+      score: 0
+    };
+
+    // Factions Data
+    const factions = {
+      'iron-scholars': {
+        title: "The Iron Scholars",
+        tag: "Military Engineers",
+        icon: "⚙️",
+        sign: "Blue Cog stencil on barricades",
+        weapons: "Welded Gatlings & Shield Walls",
+        weakness: "Extremely heavy equipment limits rapid response",
+        desc: "Initially formed from the college's Mechanical and Physics departments, the Scholars are obsessed with collecting industrial blueprints and securing machinery. They operate out of the old campus Machine Shops. They won't shoot immediately unless you breach their yellow-stenciled territory lines without authorization. Rule of thumb: if you see a cog, keep your distance, walk openly, but keep your hands in plain view."
+      },
+      'scrap-horde': {
+        title: "The Scrap-Horde",
+        tag: "Raider Syndicate",
+        icon: "💀",
+        sign: "Crude skulls painted in red engine oil",
+        weapons: "Spiked chains, Molotov cocktails",
+        weakness: "Zero patience, predictable fire plans, easily distracted by noise flares",
+        desc: "The most dangerous chaotic threat in Neo-City. They have no governing board, no syllabus, and zero tolerance for books unless they're using them as kindling. They patrol fast, shouting and revving modified lawnmowers. If you hear rhythmic clapping or metal piping hitting pavement, it's their scouting party. Survival requires running instantly or choosing solid brick-and-mortar cover. Do not try to reason with them."
+      },
+      'neon-covey': {
+        title: "The Neon Covey",
+        tag: "Subterranean Cyber-Guerrillas",
+        icon: "⚡",
+        sign: "Glow-in-the-dark triangle tags",
+        weapons: "Silent compound bows, frequency disruptors",
+        weakness: "Low numbers, defensive posture, fragile technology",
+        desc: "Operating from the city's power tunnels, the Covey wants to rebuild grid-access. They don't engage in grand block wars but rely on hit-and-run ambushes to secure solar panels and battery stacks. They value technical literacy. If you are cornered by them, holding a textbook or showing clean engineering tools can buy your life. They utilize traps that short-circuit electronics."
+      }
+    };
+
+    // Stage 0: Registration Functions
+    function selectAvatar(symbol, role) {
+      playBeep('click');
+      studentState.avatar = symbol;
+      studentState.avatarRole = role;
+
+      // Update UI active card styling
+      document.querySelectorAll('.avatar-card').forEach(card => {
+        card.classList.remove('border-amber-500', 'bg-amber-500/10');
+        if (card.dataset.avatar === symbol) {
+          card.classList.add('border-amber-500', 'bg-amber-500/10');
+        }
+      });
+    }
+
+    function startOrientation() {
+      const nameInput = document.getElementById('student-name-input').value.trim();
+      if (!nameInput) {
+        showModal("👵🏼 Mrs. Vance says: <br><br>\"An anonymous file is an easily lost file! Type in a valid Name or Scrap Call-sign before checking out our survival manual!\"");
+        return;
+      }
+
+      // Save Student info
+      studentState.name = nameInput;
+      
+      // Update HUD
+      document.getElementById('hud-name').textContent = studentState.name;
+      document.getElementById('hud-stealth').style.width = studentState.stealth + "%";
+      document.getElementById('hud-moxie').textContent = studentState.moxie + "%";
+      document.getElementById('student-hud').classList.remove('hidden');
+
+      // Populate elements for final graduation
+      document.getElementById('card-holder-name').textContent = studentState.name;
+      document.getElementById('card-avatar').textContent = studentState.avatar;
+      document.getElementById('card-role').textContent = studentState.avatarRole;
+
+      // Transition screen
+      playBeep('success');
+      document.getElementById('stage-0').classList.add('hidden');
+      document.getElementById('stage-1').classList.remove('hidden');
+
+      showModal("👵🏼 Mrs. Vance says: <br><br>\"Welcome to class, " + studentState.name + ". Let's make sure you aren't one of those students who cuts class to play in radioactive puddles. Study the three major warring factions in our neighborhood carefully. Information is the ultimate survival currency!\"");
+    }
+
+    // Stage 1: Codex & Faction Manual Functions
+    let hasReadFaction = { 'iron-scholars': false, 'scrap-horde': false, 'neon-covey': false };
+    let factionQuizPassed = false;
+
+    function readFaction(key) {
+      playBeep('action');
+      const data = factions[key];
+      hasReadFaction[key] = true;
+
+      // Populate details box
+      document.getElementById('detail-icon').textContent = data.icon;
+      document.getElementById('detail-title').textContent = data.title;
+      document.getElementById('detail-tag').textContent = data.tag;
+      document.getElementById('detail-sign').textContent = data.sign;
+      document.getElementById('detail-weapons').textContent = data.weapons;
+      document.getElementById('detail-weakness').textContent = data.weakness;
+      document.getElementById('detail-desc').textContent = data.desc;
+
+      const detailsPanel = document.getElementById('faction-details');
+      detailsPanel.classList.remove('hidden');
+      
+      // Try to enable navigation
+      checkStage1Progress();
+    }
+
+    function closeDetails() {
+      playBeep('click');
+      document.getElementById('faction-details').classList.add('hidden');
+    }
+
+    function answerFactionQuiz(isCorrect) {
+      if (isCorrect) {
+        playBeep('success');
+        factionQuizPassed = true;
+        
+        // Green highlight to popup test
+        const qBox = document.getElementById('faction-quiz-block');
+        qBox.classList.remove('border-slate-800');
+        qBox.classList.add('border-emerald-500', 'bg-emerald-950/20');
+        qBox.innerHTML = `
+          <h4 class="font-bold text-emerald-400 text-sm tracking-wide flex items-center gap-2 mb-1">
+            <span>🎉</span> TEST PASSED!
+          </h4>
+          <p class="text-slate-300 text-xs font-typewriter">
+            "Correct! Red oil and crude skull tags belong to the chaotic Scrap-Horde. Knowing who is holding down the block will keep you alive!"
+          </p>
+        `;
+        checkStage1Progress();
+      } else {
+        playBeep('fail');
+        showModal("👵🏼 Mrs. Vance says:<br><br>\"Wrong catalog! Think about the tags: skulls, chaotic chains, red paint... That's Raiders! Try selecting another code in the quiz!\"");
+      }
+    }
+
+    function checkStage1Progress() {
+      const allRead = Object.values(hasReadFaction).every(v => v === true);
+      const btn = document.getElementById('next-to-stage-2');
+      
+      if (allRead && factionQuizPassed) {
+        btn.disabled = false;
+        btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+        btn.classList.add('bg-amber-500', 'text-slate-950', 'hover:bg-amber-600', 'active:translate-y-0.5');
+        // Add listener
+        btn.onclick = () => {
+          playBeep('success');
+          document.getElementById('stage-1').classList.add('hidden');
+          document.getElementById('stage-2').classList.remove('hidden');
+          setupScavengeGame();
+        }
+      }
+    }
+
+    // Stage 2: Scavenge Game
+    const lootItems = [
+      { id: 'antibiotics', name: '💊 Antibiotics (Expired)', category: 'essential', desc: 'Can cure septic scratches from rusty scrap iron.' },
+      { id: 'tin-cans', name: '🥫 Canned Beans', category: 'essential', desc: 'Perfect high-calorie storage. Silent to carry.' },
+      { id: 'broken-radio', name: '📻 Heavy Vintage Radio', category: 'useless', desc: 'Weights 15 lbs and plays static. Pure noise trap.' },
+      { id: 'water-tablets', name: '💧 Water Purification Tabs', category: 'essential', desc: 'Clears radiation/bacterial runoff from local sewers.' },
+      { id: 'bell-necklace', name: '🔔 Box of Metal Cat Bells', category: 'useless', desc: 'Will ring with every step. Perfect way to invite raiders.' },
+      { id: 'gold-coins', name: '🪙 Pile of Ancient Gold Coins', category: 'useless', desc: 'No vendor in the DMZ accepts shiny currency; weight is better spent elsewhere.' }
+    ];
+
+    let classifiedItems = {};
+
+    function setupScavengeGame() {
+      const container = document.getElementById('scav-pile');
+      container.innerHTML = '';
+      
+      lootItems.forEach(item => {
+        const itemCard = document.createElement('button');
+        itemCard.className = "p-4 bg-slate-900 border border-slate-800 hover:border-amber-500 hover:bg-slate-850 text-slate-200 text-xs rounded-xl text-left transition flex flex-col justify-between active:scale-95";
+        itemCard.id = `scav-item-${item.id}`;
+        itemCard.innerHTML = `
+          <div>
+            <span class="font-bold text-sm block mb-1">${item.name}</span>
+            <span class="text-slate-400 leading-snug">${item.desc}</span>
+          </div>
+          <div class="mt-4 flex gap-1.5 w-full">
+            <button onclick="classifyItem('${item.id}', 'essential', event)" class="flex-1 py-1 px-1.5 bg-emerald-500/10 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 text-[9px] font-bold uppercase rounded border border-emerald-500/20 transition">ESSENTIAL</button>
+            <button onclick="classifyItem('${item.id}', 'useless', event)" class="flex-1 py-1 px-1.5 bg-red-500/10 hover:bg-red-500 hover:text-slate-950 text-red-400 text-[9px] font-bold uppercase rounded border border-red-500/20 transition">BAIT</button>
+          </div>
+        `;
+        container.appendChild(itemCard);
+      });
+    }
+
+    function classifyItem(id, targetShelf, event) {
+      event.stopPropagation();
+      const item = lootItems.find(i => i.id === id);
+      const isCorrect = item.category === targetShelf;
+
+      if (isCorrect) {
+        playBeep('success');
+        classifiedItems[id] = true;
+        
+        // Visual updates
+        const originCard = document.getElementById(`scav-item-${id}`);
+        if (originCard) originCard.remove();
+
+        const badge = document.createElement('span');
+        badge.className = `px-3 py-1.5 bg-slate-900 border ${targetShelf === 'essential' ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-400'} text-xs font-semibold rounded-lg font-mono`;
+        badge.textContent = item.name;
+        
+        if (targetShelf === 'essential') {
+          const shelf = document.getElementById('essential-items');
+          if (shelf.querySelector('span.italic')) shelf.querySelector('span.italic').remove();
+          shelf.appendChild(badge);
+        } else {
+          const shelf = document.getElementById('useless-items');
+          if (shelf.querySelector('span.italic')) shelf.querySelector('span.italic').remove();
+          shelf.appendChild(badge);
+        }
+
+        checkScavengeProgress();
+      } else {
+        playBeep('fail');
+        studentState.moxie = Math.max(20, studentState.moxie - 15);
+        document.getElementById('hud-moxie').textContent = studentState.moxie + "%";
+        
+        if (targetShelf === 'essential') {
+          showModal("👵🏼 Mrs. Vance: \"Be careful! Carrying a heavy noisy object like that is basically screaming at the raiders to shoot you. Pack light!\"");
+        } else {
+          showModal("👵🏼 Mrs. Vance: \"Don't toss that! Medical resources or water filtering tablets are life insurance out here. Put them in your pack!\"");
+        }
+      }
+    }
+
+    function checkScavengeProgress() {
+      const count = Object.keys(classifiedItems).length;
+      document.getElementById('scav-counter-text').innerHTML = `Items classified: <span class="font-bold text-amber-400">${count}/6</span>`;
+      
+      if (count === 6) {
+        const btn = document.getElementById('next-to-stage-3');
+        btn.disabled = false;
+        btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+        btn.classList.add('bg-amber-500', 'text-slate-950', 'hover:bg-amber-600', 'active:translate-y-0.5');
+        
+        btn.onclick = () => {
+          playBeep('success');
+          document.getElementById('stage-2').classList.add('hidden');
+          document.getElementById('stage-3').classList.remove('hidden');
+          startStealthGame();
+        };
+      }
+    }
+
+    // Stage 3: Stealth Calibration and Choice Engine
+    let stealthCalibrated = false;
+    let calibrateClickCount = 0;
+    let volumeLevel = 50;
+    let stealthGamePhase = 0;
+
+    // Simulate fluctuation of environmental sound
+    setInterval(() => {
+      if (document.getElementById('stage-3').classList.contains('hidden')) return;
+      
+      // Randomly change bar heights
+      const bars = [
+        document.getElementById('db-bar-1'),
+        document.getElementById('db-bar-2'),
+        document.getElementById('db-bar-3'),
+        document.getElementById('db-bar-4'),
+        document.getElementById('db-bar-5')
+      ];
+      
+      // Calculate active level
+      volumeLevel = Math.floor(Math.random() * 100);
+      
+      bars.forEach((bar, idx) => {
+        if (!bar) return;
+        const targetHeight = Math.max(5, Math.min(100, volumeLevel - (idx * 5) + (Math.random() * 20 - 10)));
+        bar.style.height = `${targetHeight}%`;
+        
+        // Colors base on danger height
+        if (targetHeight < 40) {
+          bar.className = "w-4 bg-emerald-500 transition-all duration-300";
+        } else if (targetHeight < 75) {
+          bar.className = "w-4 bg-amber-500 transition-all duration-300";
+        } else {
+          bar.className = "w-4 bg-red-500 transition-all duration-300";
+        }
+      });
+    }, 400);
+
+    function tapFootstep() {
+      // Audio calibration mini test
+      initAudio();
+      
+      // If volume is low (emerald), it's a good step!
+      if (volumeLevel < 45) {
+        playBeep('click');
+        calibrateClickCount++;
+        if (calibrateClickCount >= 3 && !stealthCalibrated) {
+          stealthCalibrated = true;
+          document.getElementById('sneak-practice-btn').textContent = "Stealth Calibrated! ✓";
+          document.getElementById('sneak-practice-btn').classList.remove('bg-amber-500');
+          document.getElementById('sneak-practice-btn').classList.add('bg-emerald-500', 'text-slate-950');
+          showModal("👵🏼 Mrs. Vance:<br><br>\"Listen to the streets, Scout! Timing your runs with ambient noises is a perfect survival skill. You've completed sound calibration. Let's tackle the crossroads simulator!\"");
+        }
+      } else {
+        playBeep('fail');
+        // Punish player slightly for stepping during loud noises
+        studentState.stealth = Math.max(20, studentState.stealth - 10);
+        document.getElementById('hud-stealth').style.width = studentState.stealth + "%";
+        
+        showModal("👵🏼 Mrs. Vance:<br><br>\"CLANG! You stepped right when a metal panel fell, triggering echoes! Only tap when the sound levels are green!\"");
+      }
+    }
+
+    // Choice-based simulation state
+    const simulationPhases = [
+      {
+        heading: "1. The Open Crossfire",
+        desc: "You are pinned behind a concrete flower planter. A street crossing divides you from the shelter block. To your left, a sniper from the Neon Covey is watching the crossroad. What route do you execute?",
+        choices: [
+          { text: "Option A: Dash straight across using a piece of metal sheet as a shield.", action: "danger", detail: "The metal is noisy and alerts the sniper. You take graze damage! (-20% Stealth)" },
+          { text: "Option B: Crawl slowly through the dry brick maintenance pipeline underneath.", action: "safe", detail: "Excellent library catalog choice. Slow, dark, damp, but highly covered. Safe passage!" },
+          { text: "Option C: Wait for an Iron Scholar armored patrol vehicle, and match its pace behind its tires.", action: "tactical", detail: "A classic strategy! The vehicle shields your heat signature. Clever Scout!" }
+        ],
+        icon: "🚨",
+        label: "Broad Street Crossroads",
+        descVisual: "Mortars shelling 50m north."
+      },
+      {
+        heading: "2. The Ruined Storefront",
+        desc: "You've successfully crossed the intersection. You're inside a semi-collapsed bakery. You hear heavy boot steps approaching outside. A patrol of Scrap-Horde scouts are searching looking for copper scraps. You need to hide instantly.",
+        choices: [
+          { text: "Option A: Hide inside the old baker's industrial steel fermentation oven.", action: "safe", detail: "The thick iron door completely blocks thermal detection. Perfect hiding slot!" },
+          { text: "Option B: Dive behind the wooden display counter.", action: "danger", detail: "Wooden planks are hollow. A scout kicks the counter, splintering it and spotting you briefly! (-20% Moxie)" },
+          { text: "Option C: Toss a glass jar out into the street to lure them away, then slip out the back.", action: "tactical", detail: "The glass breaks outside, sending the hounds looking for noise. Perfect distraction!" }
+        ],
+        icon: "🏚️",
+        label: "Flour & Sugar Bakery",
+        descVisual: "Patrol passing nearby."
+      },
+      {
+        heading: "3. Safe Boundary",
+        desc: "The shelter barricade is in sight! However, a high-frequency grid fence blocks entry, and the Iron Scholars sentinel is calling out: 'Identify yourself, neutral scavenger, or we deploy active turrets!'",
+        choices: [
+          { text: "Option A: Throw stones at the security cameras so they can't shoot you.", action: "danger", detail: "They interpret this as aggression! The defenses fire a volley of warning shots. (-25% Stealth)" },
+          { text: "Option B: Hold your NCCC Library survival manual high up in the searchlight beam.", action: "safe", detail: "The guard recognizes Mrs. Vance's logo! The security gate opens. Safe shelter achieved!" },
+          { text: "Option C: Use radio frequencies to negotiate and flash your flashlight in Morse code.", action: "tactical", detail: "You hack into their local band. They appreciate the technological discipline and admit you!" }
+        ],
+        icon: "🛡️",
+        label: "DMZ Safe Perimeter",
+        descVisual: "Turrets locked on."
+      }
+    ];
+
+    function startStealthGame() {
+      stealthGamePhase = 0;
+      loadSimulationTurn();
+    }
+
+    function loadSimulationTurn() {
+      const data = simulationPhases[stealthGamePhase];
+      if (!data) {
+        // Trigger completion
+        playBeep('success');
+        document.getElementById('stage-3').classList.add('hidden');
+        document.getElementById('stage-4').classList.remove('hidden');
+        loadSurvivalQuiz();
+        return;
+      }
+
+      document.getElementById('sim-turn-label').textContent = `Phase ${stealthGamePhase + 1} of 3`;
+      document.getElementById('sim-heading').textContent = data.heading;
+      document.getElementById('sim-description').textContent = data.desc;
+      
+      // Update visual container
+      document.getElementById('sim-visual-icon').textContent = data.icon;
+      document.getElementById('sim-visual-label').textContent = data.label;
+      document.getElementById('sim-visual-desc').textContent = data.descVisual;
+
+      // Populate choices
+      const container = document.getElementById('sim-choices-box');
+      container.innerHTML = '';
+
+      data.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3.5 bg-slate-900 hover:bg-slate-800 text-xs text-slate-300 rounded-lg border border-slate-800 transition active:scale-98 leading-relaxed";
+        btn.textContent = choice.text;
+        btn.onclick = () => selectSimChoice(choice);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectSimChoice(choice) {
+      if (choice.action === 'danger') {
+        playBeep('fail');
+        studentState.stealth = Math.max(10, studentState.stealth - 25);
+        studentState.moxie = Math.max(10, studentState.moxie - 15);
+      } else {
+        playBeep('success');
+        studentState.score += 20;
+      }
+
+      // Update HUD
+      document.getElementById('hud-stealth').style.width = studentState.stealth + "%";
+      document.getElementById('hud-moxie').textContent = studentState.moxie + "%";
+
+      showModal(`👵🏼 Mrs. Vance's Review:<br><br>${choice.detail}`);
+
+      // Next Phase
+      stealthGamePhase++;
+      loadSimulationTurn();
+    }
+
+    // Stage 4: Post-Apocalypse Core Examination
+    const examQuestions = [
+      {
+        question: "1. If a street blockade is marked with a glowing blue neon triangle sign, which faction is asserting operational authority?",
+        options: [
+          { text: "A) The Iron Scholars", correct: false },
+          { text: "B) The Scrap-Horde", correct: false },
+          { text: "C) The Neon Covey", correct: true }
+        ]
+      },
+      {
+        question: "2. You are carrying water purification tablets and an old collection of heavy copper pipes. The sound of raider alarms is ringing. What is your immediate action?",
+        options: [
+          { text: "A) Drop the heavy copper pipes to maximize velocity and escape.", correct: true },
+          { text: "B) Defend the pipes; copper has trading value.", correct: false },
+          { text: "C) Freeze and hide in a nearby dumpster with all gear.", correct: false }
+        ]
+      },
+      {
+        question: "3. What is the designated neutral ground in Neo-City sector 4 where firing is strictly banned?",
+        options: [
+          { text: "A) The Campus Gymnasium", correct: false },
+          { text: "B) The Community College Library (LRC)", correct: true },
+          { text: "C) The Underground Vault", correct: false }
+        ]
+      },
+      {
+        question: "4. When hiding from active electronic scanners deployed by cybersecurity factions, what material makes the best sensory shield?",
+        options: [
+          { text: "A) Wooden panels", correct: false },
+          { text: "B) Thick concrete and reinforced iron structures", correct: true },
+          { text: "C) Plastic sheeting", correct: false }
+        ]
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let correctExamCount = 0;
+
+    function loadSurvivalQuiz() {
+      const qData = examQuestions[currentQuestionIdx];
+      if (!qData) {
+        // Complete Exam
+        calculateGraduationRank();
+        return;
+      }
+
+      document.getElementById('quiz-progress-text').textContent = `Question ${currentQuestionIdx + 1} of 4`;
+      document.getElementById('quiz-question-text').textContent = qData.question;
+
+      const container = document.getElementById('quiz-options-box');
+      container.innerHTML = '';
+
+      qData.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-4 bg-slate-900 hover:bg-slate-850 text-slate-300 text-xs md:text-sm rounded-xl border border-slate-800 transition active:scale-98 leading-relaxed";
+        btn.textContent = opt.text;
+        btn.onclick = () => selectQuizAnswer(opt.correct);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectQuizAnswer(isCorrect) {
+      if (isCorrect) {
+        playBeep('success');
+        correctExamCount++;
+      } else {
+        playBeep('fail');
+      }
+
+      currentQuestionIdx++;
+      loadSurvivalQuiz();
+    }
+
+    function calculateGraduationRank() {
+      document.getElementById('stage-4').classList.add('hidden');
+      document.getElementById('stage-5').classList.remove('hidden');
+
+      // Rank mapping
+      let rank = "Scav-Scout Class B";
+      if (correctExamCount === 4 && studentState.stealth >= 70) {
+        rank = "Elite Lorekeeper Sentinel";
+      } else if (correctExamCount >= 3) {
+        rank = "Accredited Archivist Survivor";
+      } else {
+        rank = "Assistant Deck Scrubber";
+      }
+
+      // Update card
+      document.getElementById('card-rank').textContent = rank;
+      
+      // Update badge pass color based on rank
+      const statusLabel = document.getElementById('card-rank');
+      if (correctExamCount === 4) {
+        statusLabel.className = "text-emerald-400 font-bold uppercase tracking-wider text-xs";
+      } else {
+        statusLabel.className = "text-amber-400 font-bold uppercase tracking-wider text-xs";
+      }
+
+      showModal("🎉 MRS. VANCE GRADUATED YOU!<br><br>\"Your test results are logged. Your physical survival card has been signed off! Come claim your credential at the front desk.\"");
+    }
+
+    function restartCourse() {
+      playBeep('success');
+      currentQuestionIdx = 0;
+      correctExamCount = 0;
+      stealthCalibrated = false;
+      calibrateClickCount = 0;
+      classifiedItems = {};
+      hasReadFaction = { 'iron-scholars': false, 'scrap-horde': false, 'neon-covey': false };
+      factionQuizPassed = false;
+      studentState = {
+        name: "Scout",
+        avatar: "📚",
+        avatarRole: "The Archivist",
+        stealth: 100,
+        moxie: 100,
+        score: 0
+      };
+
+      document.getElementById('stage-1').classList.add('hidden');
+      document.getElementById('stage-2').classList.add('hidden');
+      document.getElementById('stage-3').classList.add('hidden');
+      document.getElementById('stage-4').classList.add('hidden');
+      document.getElementById('stage-5').classList.add('hidden');
+      document.getElementById('student-hud').classList.add('hidden');
+      
+      const st1btn = document.getElementById('next-to-stage-2');
+      st1btn.disabled = true;
+      st1btn.className = "px-6 py-3 bg-slate-800 text-slate-500 font-bold rounded-xl tracking-wider uppercase transition cursor-not-allowed";
+      
+      const st2btn = document.getElementById('next-to-stage-3');
+      st2btn.disabled = true;
+      st2btn.className = "px-6 py-3 bg-slate-800 text-slate-500 font-bold rounded-xl tracking-wider uppercase transition cursor-not-allowed";
+
+      document.getElementById('student-name-input').value = '';
+      
+      document.getElementById('stage-0').classList.remove('hidden');
+    }
+
+    // Play welcome entry sound
+    window.onload = function() {
+      setTimeout(() => {
+        initAudio();
+        playBeep('siren');
+      }, 500);
+    };
+  </script>
+</body>
+</html>
