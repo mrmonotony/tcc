@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TCC Learning Commons - Interactive Research Handout & AI Lab</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      /* TCC Learning Commons Brand Colors */
+      --tcc-navy: #002855;
+      --tcc-navy-dark: #001A3B;
+      --tcc-cyan: #00A3E0;
+      --tcc-cyan-light: #E6F6FC;
+      --tcc-gold: #FFC72C;
+      --tcc-gold-dark: #D9A000;
+      --tcc-gray-bg: #F4F7FA;
+      --tcc-border: #CBD5E1;
+      --tcc-text: #1E293B;
+      --tcc-muted: #64748B;
+      
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 12px rgba(0,40,85,0.08);
+      --shadow-lg: 0 10px 25px rgba(0,40,85,0.15);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--tcc-gray-bg);
+      color: var(--tcc-text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- TOP TOOLBAR --- */
+    .app-header {
+      background: var(--tcc-navy);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-badge {
+      background: var(--tcc-gold);
+      color: var(--tcc-navy-dark);
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .brand-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .brand-title p {
+      font-size: 0.8rem;
+      color: #94A3B8;
+    }
+    .toolbar-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: var(--tcc-cyan);
+      color: white;
+    }
+    .btn-primary:hover { background: #0082B5; }
+    .btn-gold {
+      background: var(--tcc-gold);
+      color: var(--tcc-navy-dark);
+    }
+    .btn-gold:hover { background: var(--tcc-gold-dark); color: white; }
+    .btn-outline {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    /* --- LAYOUT WORKSPACE --- */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+    .workspace.lab-collapsed {
+      grid-template-columns: 1fr;
+    }
+
+    /* --- PRINTABLE HANDOUT CANVAS --- */
+    .handout-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+    }
+    .handout-page {
+      background: white;
+      width: 100%;
+      max-width: 8.5in;
+      min-height: 11in;
+      padding: 0.6in 0.6in 0.5in 0.6in;
+      box-shadow: var(--shadow-lg);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border-top: 6px solid var(--tcc-navy);
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--tcc-navy);
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .header-sub {
+      color: var(--tcc-cyan);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-title {
+      color: var(--tcc-navy);
+      font-family: 'Merriweather', serif;
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+    .header-course {
+      font-size: 0.85rem;
+      color: var(--tcc-muted);
+      font-weight: 500;
+    }
+    .page-badge {
+      background: var(--tcc-cyan-light);
+      color: var(--tcc-navy);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid var(--tcc-cyan);
+    }
+
+    /* Learning Objectives Banner */
+    .learning-obj {
+      background: var(--tcc-cyan-light);
+      border-left: 4px solid var(--tcc-cyan);
+      padding: 0.75rem 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-bottom: 1rem;
+    }
+    .learning-obj h4 {
+      color: var(--tcc-navy);
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .obj-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      font-size: 0.78rem;
+    }
+    .obj-card {
+      background: white;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--tcc-border);
+    }
+    .obj-card strong {
+      display: block;
+      color: var(--tcc-navy);
+    }
+
+    /* Content Section Formatting */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 1rem 0 0.5rem 0;
+    }
+    .step-num {
+      background: var(--tcc-navy);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .section-title h2 {
+      font-size: 1.1rem;
+      color: var(--tcc-navy);
+    }
+
+    /* Step Cards Grid */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 0.75rem 0;
+    }
+    .step-card {
+      background: #FAFAFA;
+      border: 1px solid var(--tcc-border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+    }
+    .step-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .step-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--tcc-cyan);
+      text-transform: uppercase;
+    }
+    .step-card h3 {
+      font-size: 0.9rem;
+      color: var(--tcc-navy);
+      margin-bottom: 0.3rem;
+    }
+    .step-card p {
+      font-size: 0.78rem;
+      color: #475569;
+    }
+    .bad-example { color: #DC2626; display: block; font-size: 0.73rem; }
+    .good-example { color: #16A34A; display: block; font-size: 0.73rem; font-weight: 600; }
+
+    /* Visual Search Portal Demo */
+    .search-demo {
+      background: var(--tcc-navy);
+      color: white;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      margin: 0.75rem 0;
+    }
+    .search-demo-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--tcc-gold);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .search-input-box {
+      background: white;
+      color: var(--tcc-text);
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .search-input-box .btn-search {
+      background: var(--tcc-cyan);
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .filter-pill {
+      background: rgba(255,255,255,0.15);
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      color: #E2E8F0;
+    }
+
+    /* Database Cards */
+    .db-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 0.5rem 0;
+    }
+    .db-card {
+      border: 1px solid var(--tcc-border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      display: flex;
+      gap: 0.6rem;
+    }
+    .db-icon {
+      color: var(--tcc-navy);
+      font-size: 1.2rem;
+      padding-top: 0.1rem;
+    }
+    .db-content h3 {
+      font-size: 0.88rem;
+      color: var(--tcc-navy);
+    }
+    .db-content p { font-size: 0.75rem; color: var(--tcc-muted); margin-bottom: 0.2rem; }
+    .db-why { font-size: 0.75rem; background: var(--tcc-gray-bg); padding: 0.3rem 0.5rem; border-radius: 4px; }
+
+    /* Page Footer */
+    .page-footer {
+      border-top: 1px solid var(--tcc-border);
+      padding-top: 0.5rem;
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--tcc-muted);
+    }
+
+    /* --- RIGHT SIDEBAR: GEMINI AI LAB --- */
+    .ai-lab-panel {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--tcc-border);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 100px);
+      position: sticky;
+      top: 80px;
+      overflow: hidden;
+    }
+    .lab-header {
+      background: linear-gradient(135deg, var(--tcc-navy) 0%, var(--tcc-navy-dark) 100%);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lab-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .lab-title h2 { font-size: 1rem; }
+    .lab-body {
+      padding: 1rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* API Key Box */
+    .api-key-box {
+      background: var(--tcc-cyan-light);
+      border: 1px solid var(--tcc-cyan);
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+    }
+    .api-key-box label {
+      font-weight: 700;
+      color: var(--tcc-navy);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .input-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--tcc-border);
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Lab Tools Tabs/Sections */
+    .lab-tool {
+      border: 1px solid var(--tcc-border);
+      border-radius: var(--radius);
+      padding: 0.85rem;
+      background: #FAFAFA;
+    }
+    .lab-tool h3 {
+      font-size: 0.88rem;
+      color: var(--tcc-navy);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .lab-tool p {
+      font-size: 0.75rem;
+      color: var(--tcc-muted);
+      margin-bottom: 0.6rem;
+    }
+    .lab-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--tcc-border);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .ai-output {
+      margin-top: 0.5rem;
+      background: white;
+      border: 1px solid var(--tcc-border);
+      padding: 0.6rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+    }
+    .ai-output.active { display: block; }
+    .keyword-chip {
+      display: inline-block;
+      background: var(--tcc-cyan-light);
+      color: var(--tcc-navy);
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      margin: 0.15rem;
+      cursor: pointer;
+      font-weight: 600;
+      border: 1px solid var(--tcc-cyan);
+    }
+    .keyword-chip:hover {
+      background: var(--tcc-cyan);
+      color: white;
+    }
+
+    /* --- PRINT STYLESHEET (STRICT 8.5x11 PRINT) --- */
+    @media print {
+      @page {
+        size: 8.5in 11in;
+        margin: 0;
+      }
+      body {
+        background: white;
+        color: black;
+      }
+      .app-header,
+      .ai-lab-panel,
+      .no-print {
+        display: none !important;
+      }
+      .workspace {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .handout-container {
+        gap: 0 !important;
+      }
+      .handout-page {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        max-width: 100% !important;
+        padding: 0.5in 0.5in 0.4in 0.5in !important;
+        page-break-after: always;
+        break-after: page;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP TOOLBAR -->
+  <header class="app-header no-print">
+    <div class="brand-title">
+      <span class="brand-badge">TCC</span>
+      <div>
+        <h1>Learning Commons Research Guide &amp; AI Lab</h1>
+        <p>Interactive Classroom Handout • Tarrant County College</p>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-outline" id="btn-toggle-lab">
+        <i class="fa-solid fa-flask"></i> Toggle AI Lab
+      </button>
+      <button class="btn btn-gold" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Print Handout (PDF)
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="workspace" id="workspace">
+
+    <!-- LEFT: HANDOUT CANVAS (2 PAGES) -->
+    <main class="handout-container">
+
+      <!-- PAGE 1 -->
+      <section class="handout-page" id="page-1">
+        <div>
+          <!-- Header -->
+          <header class="page-header">
+            <div>
+              <div class="header-sub"><i class="fa-solid fa-building-columns"></i> Tarrant County College • Learning Commons</div>
+              <h1 class="header-title">EASY STEPS TO EXCELLENT RESEARCH</h1>
+              <div class="header-course">A Quick Guide for ENGL 1301 English Composition</div>
+            </div>
+            <span class="page-badge">Handout: Page 1 of 2</span>
+          </header>
+
+          <!-- Learning Objectives -->
+          <div class="learning-obj">
+            <h4><i class="fa-solid fa-bullseye"></i> ENGL 1301 Learning Objective: Locate &amp; evaluate credible academic sources.</h4>
+            <div class="obj-grid">
+              <div class="obj-card">
+                <strong>1. Identify Keywords</strong>
+                Break topic into 2–3 core search terms.
+              </div>
+              <div class="obj-card">
+                <strong>2. Filter Results</strong>
+                Limit to peer-reviewed &amp; recent years.
+              </div>
+              <div class="obj-card">
+                <strong>3. Select Databases</strong>
+                Match topic to specialized TCC databases.
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 -->
+          <div class="section-title">
+            <div class="step-num">1</div>
+            <h2>The Main Library Search Bar (TCC Search)</h2>
+          </div>
+          <p style="font-size:0.8rem; color: #475569; margin-bottom: 0.5rem;">
+            Think of the search bar on <strong>library.tccd.edu</strong> as your academic engine searching books, articles, and streaming media all at once.
+          </p>
+
+          <div class="step-grid">
+            <div class="step-card">
+              <div class="step-card-header">
+                <span class="step-tag">Step A</span>
+                <i class="fa-solid fa-key" style="color:var(--tcc-cyan);"></i>
+              </div>
+              <h3>Pick Keywords</h3>
+              <p>Avoid typing full questions.</p>
+              <span class="bad-example">❌ "Should cell phones be banned in class?"</span>
+              <span class="good-example">✓ "cell phones AND classroom"</span>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card-header">
+                <span class="step-tag">Step B</span>
+                <i class="fa-solid fa-filter" style="color:var(--tcc-cyan);"></i>
+              </div>
+              <h3>Filter Results</h3>
+              <p>Use sidebar toggles to narrow:</p>
+              <ul style="font-size:0.73rem; margin-left:1rem; color:#475569;">
+                <li>Peer-Reviewed Journals</li>
+                <li>Publication Date (Last 5 yrs)</li>
+                <li>Available Online</li>
+              </ul>
+            </div>
+
+            <div class="step-card">
+              <div class="step-card-header">
+                <span class="step-tag">Step C</span>
+                <i class="fa-solid fa-quote-right" style="color:var(--tcc-cyan);"></i>
+              </div>
+              <h3>Cite &amp; Save</h3>
+              <p>Click "Cite" in TCC Search to auto-generate standard MLA 9th citations.</p>
+            </div>
+          </div>
+
+          <!-- Visual Search Portal Demo -->
+          <div class="search-demo">
+            <span class="search-demo-title"><i class="fa-solid fa-desktop"></i> TCC Learning Commons Search Portal</span>
+            <div class="search-input-box">
+              <span id="visual-search-query">"social media" AND "mental health"</span>
+              <span class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Search</span>
+            </div>
+            <div class="filter-pills">
+              <span class="filter-pill"><i class="fa-solid fa-check"></i> Peer-Reviewed</span>
+              <span class="filter-pill"><i class="fa-solid fa-calendar"></i> Last 5 Years</span>
+              <span class="filter-pill"><i class="fa-solid fa-globe"></i> Full Text Online</span>
+            </div>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="section-title">
+            <div class="step-num">2</div>
+            <h2>Specialized TCC Databases</h2>
+          </div>
+          <p style="font-size:0.8rem; color: #475569; margin-bottom: 0.5rem;">
+            When general search yields too many hits, dive into dedicated databases curated by TCC Librarians.
+          </p>
+
+          <div class="db-grid">
+            <div class="db-card">
+              <i class="fa-solid fa-scale-balanced db-icon"></i>
+              <div class="db-content">
+                <h3>Gale Opposing Viewpoints</h3>
+                <p><strong>Best for:</strong> Argumentative &amp; persuasive essays.</p>
+                <div class="db-why">Provides pro/con viewpoints, statistics, and main debate points side-by-side.</div>
+              </div>
+            </div>
+
+            <div class="db-card">
+              <i class="fa-solid fa-newspaper db-icon"></i>
+              <div class="db-content">
+                <h3>Academic Search Complete</h3>
+                <p><strong>Best for:</strong> Multi-disciplinary scholarly research.</p>
+                <div class="db-why">Includes thousands of peer-reviewed journals across science, humanities, and social studies.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+          <div>Tarrant County College Learning Commons • <strong>library.tccd.edu</strong></div>
+          <div>PAGE 1</div>
+        </footer>
+      </section>
+
+      <!-- PAGE 2 -->
+      <section class="handout-page" id="page-2">
+        <div>
+          <!-- Header -->
+          <header class="page-header">
+            <div>
+              <div class="header-sub"><i class="fa-solid fa-shield-halved"></i> TCC Learning Commons • Source Evaluation</div>
+              <h1 class="header-title">NAVIGATING GOOGLE &amp; WIKIPEDIA</h1>
+              <div class="header-course">Critical evaluation strategies for open-web sources</div>
+            </div>
+            <span class="page-badge">Handout: Page 2 of 2</span>
+          </header>
+
+          <!-- Section 3 -->
+          <div class="section-title">
+            <div class="step-num">3</div>
+            <h2>Evaluating Web Sources</h2>
+          </div>
+
+          <div class="step-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.6rem;">
+            <div class="step-card">
+              <h3>1. Check the Domain</h3>
+              <p style="margin-bottom: 0.3rem;">Look at the URL ending:</p>
+              <div style="font-size:0.73rem;">
+                <div><strong style="color: #16A34A;">.gov / .edu</strong> - High credibility</div>
+                <div><strong style="color: #D97706;">.org</strong> - Check organizational bias</div>
+                <div><strong style="color: #DC2626;">.com / .net</strong> - Commercial / Ads</div>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <h3>2. Lateral Reading</h3>
+              <p>Don't stay on the site. Open a new tab and search what other credible sources say about the author or organization.</p>
+            </div>
+
+            <div class="step-card">
+              <h3>3. The Wikipedia Hack</h3>
+              <p>Never cite Wikipedia directly. Scroll to the bottom <strong>References</strong> section to find original academic studies!</p>
+            </div>
+          </div>
+
+          <!-- Source Credibility Cheat Sheet -->
+          <div style="margin: 1rem 0; background: var(--tcc-gray-bg); padding: 0.85rem; border-radius: var(--radius); border: 1px solid var(--tcc-border);">
+            <h3 style="font-size:0.9rem; color:var(--tcc-navy); margin-bottom: 0.5rem;"><i class="fa-solid fa-list-check"></i> Source Credibility Assessment Cheat Sheet</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.78rem;">
+              <div style="background: white; padding: 0.6rem; border-radius: 4px; border-left: 3px solid #16A34A;">
+                <strong style="color:#16A34A;">Green Light (High Credibility)</strong>
+                <ul style="margin-left: 1rem; margin-top: 0.2rem;">
+                  <li>Peer-reviewed journal articles</li>
+                  <li>Official government agency reports</li>
+                  <li>Academic books from university presses</li>
+                </ul>
+              </div>
+              <div style="background: white; padding: 0.6rem; border-radius: 4px; border-left: 3px solid #DC2626;">
+                <strong style="color:#DC2626;">Red Flags (Exercise Caution)</strong>
+                <ul style="margin-left: 1rem; margin-top: 0.2rem;">
+                  <li>No named author or credentials</li>
+                  <li>Heavy presence of clickbait ads</li>
+                  <li>Unverified social media posts</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- MLA Quick Guide -->
+          <div style="border: 1px solid var(--tcc-cyan); background: var(--tcc-cyan-light); padding: 0.85rem; border-radius: var(--radius);">
+            <h3 style="font-size:0.88rem; color: var(--tcc-navy); margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-book"></i> MLA Citation Quick Check (9th Edition)
+            </h3>
+            <p style="font-size: 0.78rem; color: var(--tcc-text); margin-bottom: 0.4rem;">
+              Standard formula for a journal article from a TCC Library database:
+            </p>
+            <div style="background: white; padding: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.75rem; border: 1px solid var(--tcc-border);">
+              Author Last, First. "Article Title." <em>Journal Title</em>, vol. #, no. #, Year, pp. #-#. <em>Database Name</em>, https://doi.org/xx.xxxx.
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+          <div>Tarrant County College Learning Commons • <strong>library.tccd.edu</strong></div>
+          <div>PAGE 2</div>
+        </footer>
+      </section>
+
+    </main>
+
+    <!-- RIGHT: GEMINI AI LAB PANEL -->
+    <aside class="ai-lab-panel no-print" id="ai-lab-panel">
+      <div class="lab-header">
+        <div class="lab-title">
+          <i class="fa-solid fa-robot" style="color:var(--tcc-gold);"></i>
+          <h2>Gemini Research Assistant</h2>
+        </div>
+        <span style="font-size:0.7rem; background: rgba(255,255,255,0.2); padding: 0.2rem 0.5rem; border-radius: 10px;">Experimental</span>
+      </div>
+
+      <div class="lab-body">
+
+        <!-- API Key Setup -->
+        <div class="api-key-box">
+          <label><i class="fa-solid fa-key"></i> Google Gemini API Key</label>
+          <div class="input-group">
+            <input type="password" id="api-key-input" placeholder="Paste AI Studio Key...">
+            <button class="btn btn-primary" id="btn-save-key">Save</button>
+          </div>
+          <span style="font-size:0.7rem; color: var(--tcc-muted); display:block; margin-top:0.3rem;">
+            Key is stored locally in your browser.
+          </span>
+        </div>
+
+        <!-- Tool 1: Keyword Generator -->
+        <div class="lab-tool">
+          <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Topic to Keywords</h3>
+          <p>Enter your research question to generate boolean keyword strings.</p>
+          <input type="text" class="lab-input" id="topic-input" placeholder="e.g., Should college tuition be free?">
+          <button class="btn btn-primary" style="width:100%;" id="btn-gen-keywords">Generate Search Terms</button>
+
+          <div class="ai-output" id="output-keywords">
+            <!-- Dynamic Chips -->
+          </div>
+        </div>
+
+        <!-- Tool 2: Lateral Reading Check -->
+        <div class="lab-tool">
+          <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Lateral Reading Helper</h3>
+          <p>Analyze a web source or domain for credibility checklist items.</p>
+          <input type="text" class="lab-input" id="domain-input" placeholder="e.g., climate-facts-now.com">
+          <button class="btn btn-primary" style="width:100%;" id="btn-check-domain">Evaluate Source</button>
+
+          <div class="ai-output" id="output-domain"></div>
+        </div>
+
+        <!-- Tool 3: Citation Generator -->
+        <div class="lab-tool">
+          <h3><i class="fa-solid fa-quote-left"></i> Quick MLA Citation Helper</h3>
+          <p>Paste raw source info (Author, Title, Year) to format MLA 9th.</p>
+          <input type="text" class="lab-input" id="cite-input" placeholder="John Smith, AI in Education, Journal of Tech 2024">
+          <button class="btn btn-primary" style="width:100%;" id="btn-gen-cite">Build Citation</button>
+
+          <div class="ai-output" id="output-cite"></div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // LocalStorage API Key handling
+    const apiKeyInput = document.getElementById('api-key-input');
+    const btnSaveKey = document.getElementById('btn-save-key');
+    
+    let savedKey = localStorage.getItem('tcc_gemini_api_key') || '';
+    if (savedKey) {
+      apiKeyInput.value = savedKey;
+    }
+
+    btnSaveKey.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem('tcc_gemini_api_key', key);
+        alert('API Key saved successfully!');
+      } else {
+        localStorage.removeItem('tcc_gemini_api_key');
+        alert('API Key removed.');
+      }
+    });
+
+    // Toggle Sidebar Panel
+    const workspace = document.getElementById('workspace');
+    const btnToggleLab = document.getElementById('btn-toggle-lab');
+    
+    btnToggleLab.addEventListener('click', () => {
+      workspace.classList.toggle('lab-collapsed');
+    });
+
+    // Gemini API Call Helper
+    async function callGemini(prompt) {
+      const apiKey = localStorage.getItem('tcc_gemini_api_key') || apiKeyInput.value.trim();
+      if (!apiKey) {
+        alert('Please enter and save a valid Google Gemini API Key first.');
+        return null;
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (err) {
+        alert('Gemini API call failed: ' + err.message);
+        return null;
+      }
+    }
+
+    // Tool 1: Keyword Generator
+    const btnGenKeywords = document.getElementById('btn-gen-keywords');
+    const topicInput = document.getElementById('topic-input');
+    const outputKeywords = document.getElementById('output-keywords');
+    const visualSearchQuery = document.getElementById('visual-search-query');
+
+    btnGenKeywords.addEventListener('click', async () => {
+      const topic = topicInput.value.trim();
+      if (!topic) return;
+
+      outputKeywords.style.display = 'block';
+      outputKeywords.innerHTML = '<em>Generating search terms...</em>';
+
+      const prompt = `Act as an academic research librarian at Tarrant County College. For the research topic: "${topic}", produce 3 boolean search strings with AND/OR suitable for an academic database search bar. Format as a simple JSON array of strings, e.g. ["term1 AND term2", "term3 AND term4"]. Reply ONLY with the JSON array.`;
+
+      const rawResult = await callGemini(prompt);
+      if (rawResult) {
+        try {
+          const cleanJson = rawResult.replace(/```json|```/g, '').trim();
+          const strings = JSON.parse(cleanJson);
+          
+          outputKeywords.innerHTML = '<p style="margin-bottom:0.3rem; font-weight:600;">Click a query to update Handout Visual Search Bar:</p>';
+          strings.forEach(str => {
+            const chip = document.createElement('span');
+            chip.className = 'keyword-chip';
+            chip.textContent = str;
+            chip.onclick = () => {
+              visualSearchQuery.textContent = str;
+            };
+            outputKeywords.appendChild(chip);
+          });
+        } catch (e) {
+          outputKeywords.textContent = rawResult;
+        }
+      }
+    });
+
+    // Tool 2: Lateral Reading Checker
+    const btnCheckDomain = document.getElementById('btn-check-domain');
+    const domainInput = document.getElementById('domain-input');
+    const outputDomain = document.getElementById('output-domain');
+
+    btnCheckDomain.addEventListener('click', async () => {
+      const domain = domainInput.value.trim();
+      if (!domain) return;
+
+      outputDomain.style.display = 'block';
+      outputDomain.innerHTML = '<em>Analyzing source evaluation steps...</em>';
+
+      const prompt = `For the source or web domain "${domain}", provide 3 brief bullet points explaining how a college student should perform lateral reading to verify its credibility. Keep response under 100 words.`;
+
+      const result = await callGemini(prompt);
+      if (result) {
+        outputDomain.innerHTML = `<strong>Lateral Reading Steps for ${domain}:</strong><br>` + result.replace(/\n/g, '<br>');
+      }
+    });
+
+    // Tool 3: Citation Generator
+    const btnGenCite = document.getElementById('btn-gen-cite');
+    const citeInput = document.getElementById('cite-input');
+    const outputCite = document.getElementById('output-cite');
+
+    btnGenCite.addEventListener('click', async () => {
+      const rawInfo = citeInput.value.trim();
+      if (!rawInfo) return;
+
+      outputCite.style.display = 'block';
+      outputCite.innerHTML = '<em>Formatting MLA 9th citation...</em>';
+
+      const prompt = `Convert the following source information into a properly formatted MLA 9th Edition Works Cited entry: "${rawInfo}". Return ONLY the formatted entry string.`;
+
+      const result = await callGemini(prompt);
+      if (result) {
+        outputCite.innerHTML = `<strong>MLA 9th Works Cited:</strong><br><div style="font-family:monospace; background:#f1f5f9; padding:0.4rem; border-radius:4px; margin-top:0.3rem;">${result}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
